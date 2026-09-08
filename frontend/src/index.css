@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  /* Calm, trustworthy career-guidance palette: cream background,
+     deep navy as the anchor color, muted teal + soft gold as accents. */
+  --color-paper: #f8f5ef;
+  --color-surface: #ffffff;
+  --color-line: #e6e8ec;
+  --color-line-strong: #c9cdd6;
+  --color-ink: #1f2933;
+  --color-ink-soft: #3e4c59;
+  --color-ink-muted: #667085;
+
+  --color-primary: #16324f;
+  --color-primary-soft: #24445e;
+  --color-primary-ink: #ffffff;
+  --color-secondary: #2f7d7a;
+  --color-accent: #d6a84b;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(28, 26, 23, 0.04), 0 1px 1px rgba(28, 26, 23, 0.03);
+}
+
+.btn-primary {
+  @apply font-semibold rounded-xl px-5 py-2.5 transition-colors
+         disabled:opacity-50 disabled:cursor-not-allowed;
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #0f2438;
+}
+
+.btn-outline {
+  @apply font-semibold rounded-xl px-5 py-2.5 transition-colors;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-ink);
+}
+.btn-outline:hover {
+  background: var(--color-paper);
+}
+
+.input-field {
+  @apply w-full rounded-lg px-3 py-2 transition-colors focus:outline-none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-ink);
+}
+.input-field:focus {
+  border-color: var(--color-primary);
+}
+
+.section-title {
+  @apply text-2xl font-bold mb-6;
+  color: var(--color-ink);
+}
+
+.metric-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(28, 26, 23, 0.04);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* PDF export: the "Download PDF Report" button opens the browser's own
+   print dialog, where "Save as PDF" is a standard destination on every
+   major browser -- no server-side rendering or extra JS library needed.
+   This stylesheet just makes that output look like a report instead of
+   a printed webpage. */
+@media print {
+  nav, .no-print { display: none !important; }
+  body { background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+  a[href]::after { content: ""; }
+}
