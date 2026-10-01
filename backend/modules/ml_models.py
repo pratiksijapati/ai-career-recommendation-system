@@ -1,42 +1,10 @@
-# =============================================================
-# backend/modules/ml_models.py
-# =============================================================
-# PURPOSE:
-#   Train the hierarchical recommendation pipeline:
-#
-#   Level 1 (Domain)          -> Random Forest, trained on the
-#                                 whole dataset. Real aptitude signal
-#                                 exists here (skills/academics
-#                                 genuinely relate to domain fit).
-#
-#   Level 2 (Role)            -> One Random Forest PER DOMAIN
-#                                 (a cascade), each trained only on
-#                                 that domain's students. Fewer
-#                                 competing classes + more relevant
-#                                 training data than one flat model.
-#
-#   Level 3 (Specialization)  -> NOT a trained classifier. There is
-#                                 no honest ground truth linking
-#                                 academic scores to "will you prefer
-#                                 Web vs Mobile development" -- that's
-#                                 driven by exposure and curiosity,
-#                                 not aptitude. Instead: find the most
-#                                 similar real students within that
-#                                 role (KNN) and report which
-#                                 specializations THEY actually chose,
-#                                 as a similarity-based relevance
-#                                 score, not a fabricated prediction.
-#
-#   K-Means                   -> Unsupervised student-archetype
-#                                 clustering, for EDA/insight only --
-#                                 not part of the recommendation path.
-# =============================================================
+
 
 import numpy as np
 import pandas as pd
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import NearestNeighbors 
 from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -47,35 +15,15 @@ from modules.data_loader import (
     INTEREST_TAXONOMY,
 )
 
-# How much the interest-only signal counts in the final Domain blend.
-# See the design note on train_domain_model() for why this exists.
 INTEREST_BLEND_WEIGHT = 0.45
 
 
-# =============================================================
-# LEVEL 1 — DOMAIN MODEL
-# =============================================================
-# Trained as TWO models blended together, not one:
-#   - a full-profile Random Forest (academics + skills + prefs + interests)
-#   - an interest-only Random Forest (just the interest-domain aggregates)
-# Why: academic scores have much bigger between-domain spread (e.g.
-# business_score averages ~92 in Finance vs ~62 in Technology) than
-# interest tags do, so in one shared model, score features end up
-# dominating every split and interests barely move the outcome --
-# meaning a student who leaves academics at the wizard's defaults and
-# only sets interests gets a result driven by "average student," not
-# by what they actually told the system about themselves. Blending in
-# a dedicated interest-only model guarantees interests always get a
-# real, guaranteed say, the same way the sister project blends RF+KNN
-# with a stated weight rather than leaving it to chance.
 
 def train_domain_model(df: pd.DataFrame) -> dict:
     y = df["domain"].values
     le = LabelEncoder()
     y_enc = le.fit_transform(y)
 
-    # Single shared split so both models are evaluated on the same
-    # held-out students and their predict_proba columns line up
     idx_train, idx_test = train_test_split(
         df.index.values, test_size=0.2, random_state=42, stratify=y_enc
     )
@@ -88,13 +36,6 @@ def train_domain_model(df: pd.DataFrame) -> dict:
         X_train_s = scaler.fit_transform(X_train)
         X_test_s = scaler.transform(X_test)
 
-        # class_weight='balanced' matters a lot here: domains with
-        # specialization depth (Technology, Finance, Design) end up
-        # with far more training rows than shallow domains, purely as
-        # a side effect of the Level-3 oversampling -- without this,
-        # the model learns a population-size prior and defaults to
-        # the biggest domains whenever the real signal is weak/mixed,
-        # regardless of what the student actually said.
         rf = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth,
                                      class_weight='balanced', random_state=42)
         rf.fit(X_train_s, y_train)
@@ -133,10 +74,6 @@ def train_domain_model(df: pd.DataFrame) -> dict:
         "train_samples": len(idx_train), "test_samples": len(idx_test),
     }
 
-
-# =============================================================
-# LEVEL 2 — ROLE MODELS (one per domain, the actual "cascade")
-# =============================================================
 
 def train_role_models(df: pd.DataFrame) -> dict:
     role_models = {}
@@ -183,9 +120,6 @@ def train_role_models(df: pd.DataFrame) -> dict:
     return role_models
 
 
-# =============================================================
-# LEVEL 3 — SPECIALIZATION (similarity-based, not a classifier)
-# =============================================================
 
 def recommend_specializations(student_vector: np.ndarray, domain: str, role: str,
                                 df: pd.DataFrame, k: int = 15) -> list:
@@ -236,6 +170,54 @@ def recommend_specializations(student_vector: np.ndarray, domain: str, role: str
 # K-MEANS — student archetypes (EDA / insight only)
 # =============================================================
 
+def manual_kmeans(X, n_clusters=6, max_iterations=100, random_state=42):
+    np.random.seed(random_state)
+
+    # Step 1: choose random starting centroids
+    random_indices = np.random.choice(
+        len(X),
+        n_clusters,
+        replace=False
+    )
+
+    centroids = X[random_indices].copy()
+
+    for _ in range(max_iterations):
+
+        # Step 2: calculate distance from every point to every centroid
+        distances = np.linalg.norm(
+            X[:, np.newaxis] - centroids,
+            axis=2
+        )
+
+        # Step 3: assign each point to nearest centroid
+        labels = np.argmin(distances, axis=1)
+
+        new_centroids = []
+
+        # Step 4: calculate new centroid for every cluster
+        for cluster_id in range(n_clusters):
+
+            cluster_points = X[labels == cluster_id]
+
+            if len(cluster_points) > 0:
+                new_centroid = cluster_points.mean(axis=0)
+            else:
+                new_centroid = centroids[cluster_id]
+
+            new_centroids.append(new_centroid)
+
+        new_centroids = np.array(new_centroids)
+
+        # Step 5: stop if centroids no longer change
+        if np.allclose(centroids, new_centroids):
+            break
+
+        centroids = new_centroids
+
+    return labels, centroids
+
+
 def train_kmeans(df: pd.DataFrame, n_clusters: int = 6) -> dict:
     from modules.data_loader import SKILL_COLS  # local import to avoid cycle at module load
 
@@ -243,8 +225,7 @@ def train_kmeans(df: pd.DataFrame, n_clusters: int = 6) -> dict:
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    km = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-    labels = km.fit_predict(X_scaled)
+    labels, centroids = manual_kmeans(X_scaled, n_clusters=n_clusters)
 
     df_c = df.copy()
     df_c["cluster"] = labels
@@ -259,7 +240,7 @@ def train_kmeans(df: pd.DataFrame, n_clusters: int = 6) -> dict:
             "top_domains": cluster_df["domain"].value_counts().head(3).to_dict(),
         })
 
-    return {"model": km, "scaler": scaler, "cluster_labels": labels.tolist(),
+    return {"scaler": scaler, "centroids": centroids, "cluster_labels": labels.tolist(),
             "n_clusters": n_clusters, "summary": summary}
 
 

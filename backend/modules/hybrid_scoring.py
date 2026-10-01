@@ -1,103 +1,31 @@
-# =============================================================
-# backend/modules/hybrid_scoring.py
-# =============================================================
-# PURPOSE:
-#   Turn a domain's ML signal into a defensible "Alignment Score" --
-#   not a probability of success, a transparent blend of five things
-#   that all plausibly matter to whether a career direction is a
-#   good fit. See the formula/component notes below.
-#
-#   These thresholds (Strong/Possible/Weak, the interest/skill/
-#   academic cutoffs used in contradiction handling) are practical,
-#   hand-chosen UX cutoffs for THIS tool, tuned against a handful of
-#   test profiles -- they are not statistically validated against
-#   real-world outcome data, and the UI must not imply otherwise.
-# =============================================================
 
 import pandas as pd
 
 from modules.data_loader import SKILL_COLS, SCORE_COLS, PREFERENCE_COLS, INTEREST_TAXONOMY
 from interest_taxonomy import role_interest_tags
 
-# --- component weights (sum to 1.0) -----------------------------------
-# WHY these five, and why this split (see also the "no double counting"
-# note below): Model Signal is what a Random Forest -- trained on the
-# student's skills, academics, preferences, and interest totals --
-# thinks, given population-level patterns in the dataset. But RF
-# probability has no concept of "the student explicitly said no" --
-# it just reflects resemblance to students who ended up in a domain.
-# Interest Fit is the one component that exists specifically to let a
-# student's STATED interest override a merely statistical resemblance,
-# which is why it carries the single largest weight.
+
 MODEL_WEIGHT = 0.30
 INTEREST_WEIGHT = 0.35
 PREFERENCE_WEIGHT = 0.15
 SKILL_WEIGHT = 0.15
 ACADEMIC_WEIGHT = 0.05
 
-# NOTE ON DOUBLE-COUNTING INTEREST (audited): earlier this component
-# blended TWO Random Forests into "Model Signal" -- a whole-profile RF
-# and a second RF trained ONLY on interest totals, weighted 55/45.
-# That second model existed only to inject interest signal a SECOND
-# time, on top of the interest already sitting inside the whole-profile
-# RF's own 35 input features -- an intentional double-boost that only
-# applied to interest and not symmetrically to skills/academics/prefs.
-# Model Signal is now ONLY the whole-profile RF's own probability.
-# It still "sees" interest (13 of its 35 input features are the
-# interest_agg__<domain> columns), the same way it sees skills,
-# academics, and preferences -- each of those ALSO gets its own
-# explicit Fit term below, exactly like interest does. So every
-# component is treated the same way: one diffuse mention inside the
-# RF's feature set, plus one explicit, transparent Fit term. Per this
-# project's own earlier feature-importance measurement, interest_agg
-# columns don't even crack the RF's top 10 features -- so the residual
-# interest signal folded into Model Signal's 30% weight is a small
-# fraction of that 30%, not a hidden second 30-45%. The EXPLICIT 35%
-# Interest Fit term below is what actually and transparently carries
-# the weight of "did the student say they want this."
-
-# --- Interest Fit: strength of top tags + breadth, not raw tag count --
-# Reward strength of the tags actually picked, capped so clicking MORE
-# tags beyond a genuine, committed set (3, matching the wizard's own
-# 3-tag minimum) can't inflate the score further -- and weight breadth
-# only lightly, so a pile of many WEAK tags can't out-score one or two
-# genuinely strong ones.
 INTEREST_TOP_K = 3
 INTEREST_STRENGTH_WEIGHT = 0.70
 INTEREST_BREADTH_WEIGHT = 0.30
 MAX_TAG_STRENGTH = 3.0
 
-# "Curious to explore" tags register light interest -- clearly less
-# than a genuine cycled-interest tag, and capped low enough that
-# curiosity ALONE can never cross LOW_INTEREST_THRESHOLD below and
-# read as "expressed interest." It can only nudge a domain that
-# already has some real signal, or soften (not erase) a zero-interest
-# read.
 CURIOUS_TAG_VALUE = 4.0
 CURIOUS_TAG_CAP = 8.0
 
-# Below this, a domain is treated as "no expressed interest"
 LOW_INTEREST_THRESHOLD = 15.0
 
-# What "skills/academics strongly contradict the low interest" means
 STRONG_TRAITS_SKILL_MIN = 75.0
 STRONG_TRAITS_ACADEMIC_MIN = 60.0
 
-# --- contradiction handling: fixed-point deductions, not a multiplier -
-# A MULTIPLIER is mathematically broken here: with zero interest, the
-# highest a domain could ever score (interest term contributes 0) is
-# the other four components at 100% each, i.e. 65 points (1 -
-# INTEREST_WEIGHT). A 0.75x multiplier caps that theoretical max at
-# 48.75 -- which can NEVER reach the 50% "Possible" threshold, no
-# matter how strong the student's skills/academics/preferences/model
-# signal are. That defeats the entire point of a "soft" contradiction
-# path. Instead: recompute what the domain would score with the
-# interest term set aside and the remaining four weights renormalized
-# to fill the full 100%, then subtract a fixed point deduction -- large
-# enough to matter, small enough that a genuinely strong non-interest
-# profile can still land in "Possible."
-CONTRADICTION_DEDUCTION = 10.0   # strong skills/academics despite low interest
-SUPPRESSION_DEDUCTION = 25.0     # low interest AND nothing else strongly points here
+CONTRADICTION_DEDUCTION = 10.0
+SUPPRESSION_DEDUCTION = 25.0
 
 STRONG_MATCH_THRESHOLD = 70.0
 POSSIBLE_MATCH_THRESHOLD = 50.0

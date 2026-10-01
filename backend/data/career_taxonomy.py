@@ -1,22 +1,3 @@
-# =============================================================
-# backend/data/career_taxonomy.py
-# =============================================================
-# PURPOSE:
-#   The career hierarchy: Domain -> Role -> Specialization -> Technology.
-#   This is authored domain knowledge (facts about how careers are
-#   actually organized in the real world), not something a model
-#   learns. Random Forest / KNN are used later to PREDICT a student's
-#   position in this tree; this file just defines the tree itself.
-#
-#   Three domains are built out to full depth (Specialization +
-#   Technology) as the working proof of the pattern:
-#     - Technology & Computing
-#     - Finance & Business
-#     - Design & Creative
-#   The other ten domains stop at Role level for now. The structure
-#   is written so any domain can be deepened later without touching
-#   the other domains — see EXPANDABLE flag on each domain.
-# =============================================================
 
 CAREER_TAXONOMY = {
 

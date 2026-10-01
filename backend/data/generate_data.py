@@ -1,24 +1,3 @@
-# =============================================================
-# backend/data/generate_data.py
-# =============================================================
-# PURPOSE:
-#   Generate a synthetic student dataset for the hierarchical
-#   (Domain -> Role -> Specialization -> Technology) recommendation
-#   system.
-#
-#   THIS DATA IS SYNTHETIC. It is generated from hand-authored
-#   domain/role profiles (skills, academics, preferences) sampled
-#   with noise -- it is NOT real student survey data. It exists so
-#   the ML pipeline can be built and tested end to end. Before any
-#   real deployment, Domain/Role skill requirements should be
-#   validated against real outcome data (student surveys, or public
-#   occupational data such as O*NET, which publishes real skill-
-#   importance ratings per occupation).
-#
-# HOW TO RUN:
-#   cd backend/data
-#   python generate_data.py
-# =============================================================
 
 import numpy as np
 import pandas as pd
@@ -46,8 +25,6 @@ SCORE_COLS = [
     "computer_score", "business_score", "arts_score",
 ]
 
-# 1 = the first label, 5 = the second label (e.g. pref_indoor_vs_outdoor:
-# 1 = strongly indoor, 5 = strongly outdoor)
 PREFERENCE_COLS = [
     "pref_people_vs_independent",
     "pref_creative_vs_analytical",
@@ -62,11 +39,7 @@ EDUCATION_LEVELS = ["+2 / High School", "Bachelor", "Master"]
 INTEREST_TAGS = all_tags()          # 78 tags, one-hot-ish with 0-3 strength
 TAG_TO_DOMAIN = tag_to_domain()
 
-# Every unique tool/tech skill mentioned anywhere in the taxonomy's
-# "tools_required" dicts -- collected once, used as extra columns.
-# Most students will be 0 (beginner/no exposure) on almost all of
-# these -- that's correct, not missing data: nobody has a meaningful
-# self-assessment for a tool they haven't started learning yet.
+
 def _collect_tool_cols():
     tools = set()
     for ddata in CAREER_TAXONOMY.values():
@@ -80,15 +53,6 @@ def _collect_tool_cols():
 
 TOOL_COLS = _collect_tool_cols()
 
-
-# =============================================================
-# DOMAIN BASELINE PROFILES
-# =============================================================
-# Mean skill/score/preference values per Domain. Roles within a
-# domain start from this baseline and are nudged on just the 2-3
-# dimensions that genuinely distinguish them (see ROLE_OVERRIDES) --
-# this keeps 61 role profiles maintainable while still giving the
-# Level-2 Role classifier real signal to work with.
 
 DOMAIN_PROFILES = {
     "Technology & Computing": {

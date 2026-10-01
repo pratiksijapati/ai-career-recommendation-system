@@ -1,40 +1,4 @@
-# =============================================================
-# backend/data/career_knowledge.py
-# =============================================================
-# PURPOSE:
-#   Curated career guidance -- descriptions, activities, strengths,
-#   work settings, and roadmap content -- kept DELIBERATELY SEPARATE
-#   from the synthetic ML dataset (see modules/roadmap.py's design
-#   note and skill_gap.py's "career_profile vs dataset_pattern" split
-#   for the same separation applied to numeric skill targets).
-#
-#   This file answers "what does this job actually involve and how
-#   would someone prepare for it" -- content a Random Forest trained
-#   on synthetic rows has no way to know. It is hand-authored career
-#   guidance, not a statistically derived requirement, and every
-#   description here should read that way: "recommended skill
-#   profile," "useful skills," "common tools," "suggested
-#   preparation" -- never "proven requirement" or "guaranteed path."
-#
-#   Complements career_taxonomy.py rather than duplicating it:
-#   career_taxonomy.py owns the STRUCTURE (domain -> role ->
-#   specialization -> technologies) and numeric skills_required /
-#   tools_required used by skill_gap.py. This file owns the
-#   NARRATIVE layer -- description, activities, project ideas,
-#   work settings, roadmap phase content -- keyed the same way.
-#
-#   Coverage: fully authored for 6 roles spanning very different
-#   fields (Social Worker, Data Analyst, Graphic Designer, Software
-#   Developer with two specialization overrides, Financial Analyst,
-#   Nurse as a regulated-career example). Not every role in
-#   career_taxonomy.py has an entry yet -- callers must fall back
-#   gracefully (see roadmap.py's GENERIC_FALLBACK) rather than
-#   assume every role is covered.
-# =============================================================
 
-# Roles that require formal licensed education/clinical training --
-# the roadmap must never imply that completing it makes someone
-# qualified to practice, and must say so explicitly.
 REGULATED_ROLES = {
     ("Healthcare & Medicine", "Nurse"),
     ("Healthcare & Medicine", "Medical Doctor"),

@@ -1,28 +1,3 @@
-# =============================================================
-# backend/modules/skill_gap.py
-# =============================================================
-# PURPOSE:
-#   Compare a student's profile against a target skill level for a
-#   given Domain / Role / Specialization, and against tool/technology
-#   requirements for a specialization.
-#
-#   Two different sources back these targets, and the response says
-#   which one applied for each skill:
-#     - "career_profile" -- a hand-authored skill expectation for that
-#       role, written in career_taxonomy.py from how the role actually
-#       works (not derived from the synthetic dataset at all).
-#     - "dataset_pattern" -- where no hand-authored figure exists yet,
-#       the average skill level of profiles in this project's
-#       SYNTHETIC dataset for that domain/role. This is a pattern
-#       observed in the development data, not a claim about what the
-#       real career objectively requires -- most roles don't have
-#       hand-authored requirements yet, so this is still the common
-#       case (see career_taxonomy.py's "expandable" flag).
-#
-#   Skills are also bucketed into strengths / focus_first / helpful_later
-#   so the readiness page can show a few real priorities instead of
-#   every gap looking equally urgent -- see bucket_skills().
-# =============================================================
 
 import pandas as pd
 

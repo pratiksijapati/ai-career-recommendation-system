@@ -1,12 +1,12 @@
-const COLORS = ['#16324f', '#2f7d7a', '#d6a84b']
+const COLORS = ['#2f7dfa', '#38bdf8', '#60a5fa']
 const RANK_LABEL = ['Best match', '2nd match', '3rd match']
 const CONFIDENCE_STYLE = {
-    Strong: 'bg-green-50 text-green-700',
-    Possible: 'bg-amber-50 text-amber-700',
+    Strong: 'bg-green-500/15 text-green-400',
+    Possible: 'bg-amber-500/15 text-amber-400',
     Weak: 'bg-line text-ink-muted',
     // legacy labels, kept so older cached responses don't break mid-transition
-    High: 'bg-green-50 text-green-700',
-    Medium: 'bg-amber-50 text-amber-700',
+    High: 'bg-green-500/15 text-green-400',
+    Medium: 'bg-amber-500/15 text-amber-400',
     Low: 'bg-line text-ink-muted',
 }
 const MATCH_LABEL = {
@@ -49,7 +49,7 @@ const AlignmentCard = ({ item, index, label, isActive, onClick, ctaLabel, breakd
                 <ul className="text-xs text-ink-muted space-y-1">
                     {item.explanation.map((reason, i) => (
                         <li key={i} className="leading-snug flex gap-1.5">
-                            <span className="text-green-600 shrink-0">✓</span>
+                            <span className="text-green-400 shrink-0">✓</span>
                             <span>{reason}</span>
                         </li>
                     ))}

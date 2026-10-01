@@ -1,28 +1,3 @@
-# =============================================================
-# backend/modules/roadmap.py
-# =============================================================
-# PURPOSE:
-#   Turn a skill-gap result into a concrete, ordered, PERSONALIZED
-#   roadmap -- rule-based (deterministic), not ML. Depends on the
-#   selected domain/role/specialization, the student's ACTUAL gaps
-#   (not a fixed list), and their education stage.
-#
-#   Two content sources, blended:
-#     - career_knowledge.py -- hand-authored guidance for a growing
-#       set of roles (description-adjacent content: field topics,
-#       methods, a specific project, education-level exposure ideas,
-#       possible next directions). Used when available.
-#     - DOMAIN_CONTEXT / templates below -- a domain-flavored fallback
-#       for the ~50 roles not yet authored in career_knowledge.py, so
-#       every role still gets a roadmap that isn't identical across
-#       fields, just less specific than an authored one.
-#
-#   Structure: 6 phases (Understand the Field / Build Core Skills /
-#   Learn Tools & Methods / Complete a Practical Project / Get
-#   Exposure / Choose a Direction). Regulated careers (see
-#   career_knowledge.REGULATED_ROLES) replace the project phase with
-#   an explicit formal-pathway phase instead of a DIY project.
-# =============================================================
 
 import sys
 import os

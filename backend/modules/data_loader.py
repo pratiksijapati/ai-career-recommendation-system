@@ -1,11 +1,3 @@
-# =============================================================
-# backend/modules/data_loader.py
-# =============================================================
-# PURPOSE:
-#   Load and clean the student dataset; centralize column
-#   definitions so every other module imports from one place
-#   instead of hardcoding column names.
-# =============================================================
 
 import os
 import sys
@@ -24,15 +16,10 @@ DATA_PATH = os.path.join(DATA_DIR, "career_data.csv")
 INTEREST_TAGS = all_tags()
 TAG_TO_DOMAIN = tag_to_domain()
 
-# Level-1 (Domain) model features: skills + academics + preferences +
-# one aggregate "domain interest strength" per interest-domain (NOT
-# all 78 raw tags -- that would be too sparse/wide for a coarse model)
 DOMAIN_AGG_COLS = [f"interest_agg__{d}" for d in INTEREST_TAXONOMY.keys()]
 DOMAIN_FEATURE_COLS = SKILL_COLS + SCORE_COLS + PREFERENCE_COLS + DOMAIN_AGG_COLS
 
-# Level-2 (Role) model features: same as domain features, plus the
-# raw interest tags belonging to that domain specifically (added
-# per-domain at train time, since the relevant tags differ by domain)
+
 ROLE_BASE_FEATURE_COLS = SKILL_COLS + SCORE_COLS + PREFERENCE_COLS
 
 

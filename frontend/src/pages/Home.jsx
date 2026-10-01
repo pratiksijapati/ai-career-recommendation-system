@@ -33,9 +33,6 @@ const Home = () => (
                         Explore Careers
                     </Link>
                 </div>
-                <p className="text-ink-muted text-xs">
-                    About 4 minutes · No career knowledge needed
-                </p>
             </div>
         </section>
 
@@ -74,7 +71,7 @@ const Home = () => (
                 <div className="flex flex-wrap items-center justify-center gap-3">
                     <Link to="/recommend"
                           className="no-underline inline-block font-semibold rounded-xl px-5 py-2.5
-                                     bg-accent text-ink hover:brightness-95 transition-all">
+                                     bg-accent text-accent-ink hover:brightness-95 transition-all">
                         Find Careers for Me
                     </Link>
                     <Link to="/explore"
@@ -94,9 +91,6 @@ const Home = () => (
                 <span className="text-lg">🧭</span>
                 <span className="text-ink font-bold text-sm">Career Navigator</span>
             </div>
-            <p className="text-ink-muted text-xs">
-                Career exploration and recommendation for students. · Final Year Project
-            </p>
         </footer>
     </div>
 )

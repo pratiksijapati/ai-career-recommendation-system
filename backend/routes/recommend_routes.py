@@ -1,11 +1,3 @@
-# =============================================================
-# backend/routes/recommend_routes.py
-# =============================================================
-# PURPOSE:
-#   The hierarchical recommendation API: Domain -> Role ->
-#   Specialization, plus skill-gap and roadmap for whichever depth
-#   the student has drilled into.
-# =============================================================
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel

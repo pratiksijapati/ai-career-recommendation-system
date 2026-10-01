@@ -208,10 +208,15 @@ const Recommend = () => {
                 returned_count: res.data.returned_count,
                 fallback: res.data.fallback,
             })
-        } catch (err) {
-            setError('Could not get recommendations. Is the backend running?')
-            console.error(err)
-        } finally {
+       } catch (err) {
+    console.error('DOMAIN ERROR:', err)
+    console.error('BACKEND RESPONSE:', err.response?.data)
+
+    setError(
+        err.response?.data?.detail ||
+        'Could not get recommendations.'
+    )
+} finally {
             setLoading(false)
         }
     }
@@ -334,7 +339,7 @@ const Recommend = () => {
                 </h2>
 
                 {domainMeta && (
-                    <p className={`text-sm rounded-lg p-3 ${domainMeta.fallback ? 'bg-amber-50 text-amber-800' : 'bg-secondary/10 text-ink-soft'}`}>
+                    <p className={`text-sm rounded-lg p-3 ${domainMeta.fallback ? 'bg-amber-500/15 text-amber-400' : 'bg-secondary/10 text-ink-soft'}`}>
                         {buildResultMessage(domainMeta, domainResults)}
                     </p>
                 )}
@@ -413,7 +418,7 @@ const Recommend = () => {
                             <h3 className="text-ink font-bold text-lg mb-1">
                                 {selectedSpec || selectedRole}
                                 {roleDetail.regulated && (
-                                    <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 align-middle">
+                                    <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 align-middle">
                                         Regulated field
                                     </span>
                                 )}
@@ -535,7 +540,7 @@ const Recommend = () => {
 
                         {gapResult.strengths.length > 0 && (
                             <>
-                                <h4 className="text-green-700 text-xs font-semibold uppercase tracking-wide mb-2">
+                                <h4 className="text-green-400 text-xs font-semibold uppercase tracking-wide mb-2">
                                     ✓ Your Current Strengths
                                 </h4>
                                 <div className="space-y-2 mb-5">
@@ -543,9 +548,9 @@ const Recommend = () => {
                                         <div key={s.skill} className="flex items-center gap-3">
                                             <span className="text-ink-soft text-xs w-40">{s.label}</span>
                                             <div className="flex-1 h-2 bg-line rounded-full overflow-hidden">
-                                                <div className="h-full bg-green-600" style={{ width: `${s.current / 5 * 100}%` }} />
+                                                <div className="h-full bg-green-500" style={{ width: `${s.current / 5 * 100}%` }} />
                                             </div>
-                                            <span className="text-xs font-bold w-16 text-right text-green-700">{s.current}/5</span>
+                                            <span className="text-xs font-bold w-16 text-right text-green-400">{s.current}/5</span>
                                         </div>
                                     ))}
                                 </div>
@@ -554,7 +559,7 @@ const Recommend = () => {
 
                         {gapResult.focus_first.length > 0 && (
                             <>
-                                <h4 className="text-amber-700 text-xs font-semibold uppercase tracking-wide mb-2">
+                                <h4 className="text-amber-400 text-xs font-semibold uppercase tracking-wide mb-2">
                                     ▲ Focus First
                                 </h4>
                                 <div className="space-y-2 mb-5">
@@ -562,9 +567,9 @@ const Recommend = () => {
                                         <div key={s.skill} className="flex items-center gap-3">
                                             <span className="text-ink-soft text-xs w-40">{s.label}</span>
                                             <div className="flex-1 h-2 bg-line rounded-full overflow-hidden">
-                                                <div className="h-full bg-amber-500" style={{ width: `${s.current / 5 * 100}%` }} />
+                                                <div className="h-full bg-amber-400" style={{ width: `${s.current / 5 * 100}%` }} />
                                             </div>
-                                            <span className="text-xs font-bold w-24 text-right text-amber-700">
+                                            <span className="text-xs font-bold w-24 text-right text-amber-400">
                                                 {s.current}/5 → {s.required}
                                             </span>
                                         </div>
@@ -595,12 +600,12 @@ const Recommend = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     {gapResult.tools.map(t => (
                                         <div key={t.tool}
-                                             className={`rounded-lg p-2.5 ${t.status === 'Met' ? 'bg-green-50' : 'bg-paper'}`}>
+                                             className={`rounded-lg p-2.5 ${t.status === 'Met' ? 'bg-green-500/10' : 'bg-paper'}`}>
                                             <div className="flex items-center justify-between mb-1.5">
                                                 <span className="text-ink-soft text-xs font-medium flex items-center gap-1.5">
                                                     {t.label}
                                                     {t.status === 'Met' && (
-                                                        <span className="text-[10px] font-semibold text-green-700">✓ Met</span>
+                                                        <span className="text-[10px] font-semibold text-green-400">✓ Met</span>
                                                     )}
                                                 </span>
                                                 <span className="text-ink-muted text-[10px]">{t.experience}</span>
@@ -629,7 +634,7 @@ const Recommend = () => {
                         <h3 className="text-ink font-bold text-lg mb-1">🗺️ {roadmapResult.roadmap_label}</h3>
                         <p className="text-ink-muted text-sm mb-1">{roadmapResult.disclaimer}</p>
                         {roadmapResult.regulated_notice && (
-                            <p className="text-amber-800 bg-amber-50 rounded-lg p-3 text-xs leading-relaxed mb-4 mt-2">
+                            <p className="text-amber-400 bg-amber-500/15 rounded-lg p-3 text-xs leading-relaxed mb-4 mt-2">
                                 {roadmapResult.regulated_notice}
                             </p>
                         )}
@@ -696,7 +701,7 @@ const Recommend = () => {
             <div className="flex items-center gap-2 mb-6 flex-wrap">
                 {STEPS.map((s, i) => (
                     <span key={s} className={`text-xs px-3 py-1 rounded-full
-                        ${i === step ? 'bg-primary text-white' : i < step ? 'bg-green-50 text-green-700' : 'bg-line text-ink-muted'}`}>
+                        ${i === step ? 'bg-primary text-white' : i < step ? 'bg-green-500/15 text-green-400' : 'bg-line text-ink-muted'}`}>
                         {i + 1}. {s}
                     </span>
                 ))}
@@ -708,7 +713,7 @@ const Recommend = () => {
                         <h3 className="text-ink font-bold mb-4">👋 About You</h3>
                         <label className="text-ink-muted text-sm block mb-1">What should we call you? (optional)</label>
                         <input type="text" value={form.name} onChange={e => update('name', e.target.value)}
-                               placeholder="e.g. Sunita" className="input-field mb-4" />
+                               placeholder="e.g. Pratik" className="input-field mb-4" />
                         <label className="text-ink-muted text-sm block mb-1">Current Education Level</label>
                         <select value={form.education_level} onChange={e => update('education_level', e.target.value)}
                                 className="input-field mb-5">
@@ -869,7 +874,7 @@ const Recommend = () => {
                     </div>
                 )}
 
-                {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
+                {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
 
                 <div className="flex gap-3 mt-6">
                     {step > 0 && <button onClick={() => setStep(s => s - 1)} className="btn-outline flex-1">← Previous</button>}

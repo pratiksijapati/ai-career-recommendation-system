@@ -77,8 +77,8 @@ const DataAnalysis = () => {
                 </table>
             </div>
 
-            <div className="card border-amber-300 bg-amber-50">
-                <h3 className="text-amber-800 font-bold mb-2">⚠️ About this data</h3>
+            <div className="card border-amber-500/30 bg-amber-500/10">
+                <h3 className="text-amber-400 font-bold mb-2">⚠️ About this data</h3>
                 <p className="text-ink-muted text-sm">
                     This dataset is <strong>synthetic</strong> — generated from hand-authored domain/role
                     profiles with random noise, not real student survey data. It exists to build and test
